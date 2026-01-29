@@ -1,0 +1,859 @@
+1. Recheability entre los DC, ambas loopbacks 10.0.0.x 10.0.0.1.x
+2. Configurar EVPN BGP Leafs, Spine y Border Leafs
+4. Configurar la vrf y vlan
+5. Crear la inbterfaz vxlan
+6. Confiurar RT y RD en BGP
+
+loopback 0 BGP
+Loopback 1 VxLAN
+======================
+CISCO 1
+======================
+enable
+conf ter 
+hostname CISCO_1
+router ospf 10
+router-id 1.1.1.1
+exit
+inter e0/0
+ip addr 210.0.0.26 255.255.255.252
+no shut
+exit
+inter e0/1
+ip addr 210.0.0.46 255.255.255.252
+no shut
+exit
+inter e0/2
+ip addr 210.0.0.42 255.255.255.252
+no shut
+exit
+inter e0/3
+ip addr 210.0.0.37 255.255.255.252
+no shut
+exit
+inter e1/0
+ip addr 210.0.0.33 255.255.255.252
+no shut
+exit
+inter e1/1
+ip addr 210.0.0.29 255.255.255.252
+no shut
+exit
+inter range e0/0-3,e1/0,e1/1
+ip ospf 10 area 0
+exit
+======================
+CISCO 2
+======================
+enable
+conf ter 
+hostname CISCO_2
+router ospf 10
+router-id 2.2.2.2
+exit
+inter e0/0
+ip addr 210.0.0.25 255.255.255.252
+no shut
+exit
+inter e0/1
+ip addr 210.0.0.1 255.255.255.252
+no shut
+exit
+inter e0/2
+ip addr 210.0.0.22 255.255.255.252
+no shut
+exit
+inter range e0/0-2
+ip ospf 10 area 0
+exit
+======================
+CISCO 3
+======================
+enable
+conf ter 
+hostname CISCO_3
+router ospf 10
+router-id 3.3.3.3
+redistribute static
+exit
+inter e0/0
+ip addr 210.0.0.45 255.255.255.252
+no shut
+exit
+inter e0/1
+ip addr 210.0.0.21 255.255.255.252
+no shut
+exit
+inter e0/2
+ip addr 210.0.0.17 255.255.255.252
+no shut
+exit
+inter e0/3
+ip addr 210.0.0.50 255.255.255.252
+no shut
+exit
+inter range e0/0-3
+ip ospf 10 area 0
+exit
+
+ip route 100.0.0.0 255.255.255.248 210.0.0.49
+ip route 100.0.1.0 255.255.255.248 210.0.0.49
+
+======================
+CISCO 4
+======================
+enable
+conf ter 
+hostname CISCO_4
+router ospf 10
+router-id 4.4.4.4
+exit
+inter e0/0
+ip addr 210.0.0.41 255.255.255.252
+no shut
+exit
+inter e0/1
+ip addr 210.0.0.18 255.255.255.252
+no shut
+exit
+inter e0/2
+ip addr 210.0.0.13 255.255.255.252
+no shut
+exit
+inter range e0/0-2
+ip ospf 10 area 0
+exit
+======================
+CISCO 5
+======================
+enable
+conf ter 
+hostname CISCO_5
+router ospf 10
+router-id 5.5.5.5
+exit
+inter e0/0
+ip addr 210.0.0.38 255.255.255.252
+no shut
+exit
+inter e0/1
+ip addr 210.0.0.14 255.255.255.252
+no shut
+exit
+inter e0/2
+ip addr 210.0.0.9 255.255.255.252
+no shut
+exit
+inter range e0/0-2
+ip ospf 10 area 0
+exit
+======================
+CISCO 6
+======================
+enable
+conf ter 
+hostname CISCO_6
+router ospf 10
+router-id 6.6.6.6
+redistribute static
+exit
+inter e0/0
+ip addr 210.0.0.30 255.255.255.252
+no shut
+exit
+inter e0/1
+ip addr 210.0.0.5 255.255.255.252
+no shut
+exit
+inter e0/2
+ip addr 210.0.0.2 255.255.255.252
+no shut
+exit
+inter e0/3
+ip addr 210.0.0.53 255.255.255.252
+no shut
+exit
+inter range e0/0-3
+ip ospf 10 area 0
+exit
+
+ip route 100.0.0.8 255.255.255.248 210.0.0.54
+ip route 100.0.1.8 255.255.255.248 210.0.0.54
+
+======================
+CISCO 7
+======================
+enable
+conf ter 
+hostname CISCO_7
+router ospf 10
+router-id 7.7.7.7
+exit
+inter e0/0
+ip addr 210.0.0.34 255.255.255.252
+no shut
+exit
+inter e0/1
+ip addr 210.0.0.10 255.255.255.252
+no shut
+exit
+inter e0/2
+ip addr 210.0.0.6 255.255.255.252
+no shut
+exit
+inter range e0/0-2
+ip ospf 10 area 0
+exit
+============================
+SPINE 8
+=============================
+enable
+conf ter 
+hostname SPINE_8
+ip routing
+inter loopback 0
+ip addr 100.0.0.2 255.255.255.255
+exit
+inter loopback 1
+ip addr 100.0.1.2 255.255.255.255
+exit
+inter e0/0
+ip addr 200.0.0.13 255.255.255.252
+no shutdown
+exit
+inter e0/1
+ip addr 200.0.0.6 255.255.255.252
+no shutdown
+exit
+
+router ospf 10
+router-id 100.0.0.2
+network 100.0.0.2 0.0.0.0 area 0
+network 100.0.1.2 0.0.0.0 area 0
+network 200.0.0.4 0.0.0.3 area 0
+network 200.0.0.12 0.0.0.3 area 0
+exit
+
+router bgp 100
+bgp router-id 100.0.0.2
+neighbor LEAFS peer-group
+neighbor LEAFS remote-as 100
+neighbor LEAFS update-source Loopback0
+neighbor 100.0.0.4 peer-group LEAFS
+neighbor 100.0.0.5 peer-group LEAFS
+neighbor 100.0.0.1 peer-group LEAFS
+address-family l2vpn evpn
+neighbor 100.0.0.1 activate
+neighbor 100.0.0.4 activate
+neighbor 100.0.0.5 activate
+neighbor LEAFS send-community extended
+neighbor LEAFS route-reflector-client
+exit
+============================
+SPINE 9
+=============================
+enable
+conf ter 
+hostname SPINE_9
+inter loopback 0
+ip addr 100.0.0.3 255.255.255.255
+exit
+inter loopback 1
+ip addr 100.0.1.3 255.255.255.255
+exit
+inter e0/0
+ip addr 200.0.0.10 255.255.255.252
+no shutdown
+exit
+inter e0/1
+ip addr 200.0.0.17 255.255.255.252
+no shutd
+exit
+inter e0/2
+ip addr 200.0.0.2 255.255.255.252
+no shutdown
+exit
+
+router ospf 10
+router-id 100.0.0.3
+network 100.0.0.3 0.0.0.0 area 0
+network 100.0.1.3 0.0.0.0 area 0
+network 200.0.0.0 0.0.0.3 area 0
+network 200.0.0.8 0.0.0.3 area 0
+network 200.0.0.16 0.0.0.3 area 0
+exit
+
+router bgp 100
+bgp router-id 100.0.0.3
+neighbor LEAFS peer-group
+neighbor LEAFS remote-as 100
+neighbor LEAFS update-source Loopback0
+neighbor 100.0.0.1 peer-group LEAFS
+neighbor 100.0.0.4 peer-group LEAFS  
+neighbor 100.0.0.5 peer-group LEAFS 
+address-family l2vpn evpn
+neighbor 100.0.0.1 activate
+neighbor 100.0.0.4 activate
+neighbor 100.0.0.5 activate
+neighbor LEAFS send-community extended
+neighbor LEAFS route-reflector-client
+exit
+============================
+SPINE 10
+=============================
+enable
+conf ter 
+hostname SPINE_10
+inter loopback 0
+ip addr 100.0.0.10 255.255.255.255
+exit
+inter loopback 1
+ip addr 100.0.1.10 255.255.255.255
+exit
+inter e0/0
+ip addr 200.0.1.2 255.255.255.252
+no shutdown
+exit
+inter e0/1
+ip addr 200.0.1.5 255.255.255.252
+no shut
+exit
+
+router ospf 10
+router-id 100.0.0.10
+network 100.0.0.10 0.0.0.0 area 0
+network 100.0.1.10 0.0.0.0 area 0
+network 200.0.1.0 0.0.0.3 area 0
+network 200.0.1.4 0.0.0.3 area 0
+exit
+
+router bgp 200
+bgp router-id 100.0.0.10
+neighbor LEAFS peer-group
+neighbor LEAFS remote-as 200
+neighbor LEAFS update-source Loopback0
+neighbor 100.0.0.9 peer-group LEAFS
+neighbor 100.0.0.11 peer-group LEAFS  
+address-family l2vpn evpn
+neighbor 100.0.0.9 activate
+neighbor 100.0.0.11 activate
+neighbor LEAFS send-community extended
+neighbor LEAFS route-reflector-client
+exit
+============================
+LEAF 11
+=============================
+enable
+conf ter 
+hostname LEAF_11
+ip routing
+inter loopback 0
+ip addr 100.0.0.4 255.255.255.255
+exit
+inter loopback 1
+ip addr 100.0.1.4 255.255.255.255
+exit
+inter eth1
+no switchport
+ip addr 200.0.0.9 255.255.255.252
+no shutdown
+exit
+inter eth2
+no switchport
+ip addr 200.0.0.5 255.255.255.252
+exit
+
+router ospf 10
+router-id 100.0.0.4
+network 100.0.0.4 0.0.0.0 area 0
+network 100.0.1.4 0.0.0.0 area 0
+network 200.0.0.4 0.0.0.3 area 0
+network 200.0.0.8 0.0.0.3 area 0
+exit
+
+router bgp 100
+router-id 100.0.0.4
+distance bgp 20 200 200
+neighbor SPINES peer group
+neighbor SPINES remote-as 100
+neighbor SPINES update-source Loopback0
+neighbor 100.0.0.2 peer group SPINES
+neighbor 100.0.0.3 peer group SPINES
+address-family evpn
+neighbor 100.0.0.2 activate
+neighbor 100.0.0.3 activate
+neighbor SPINES send-community extended
+exit
+
+vrf instance Lab1
+ip routing vrf Lab1
+vlan 100
+name SERVERS
+exit
+vlan 101
+name ACCOUNTING
+exit
+vlan 102
+name TI
+exit
+
+inter vlan 100
+vrf Lab1
+ip address 192.168.100.1/24
+exit
+inter vlan 101
+vrf Lab1
+ip address 192.168.101.1/24
+exit
+inter vlan 102
+vrf Lab1
+ip address 192.168.102.1/24
+exit
+
+int eth3
+switchport mode access
+switchport access vlan 100
+exit
+int eth4
+switchport mode access
+switchport access vlan 101
+exit
+int eth5
+switchport mode access
+switchport access vlan 102
+exit
+
+int vxlan1
+vxlan source-int lo1
+vxlan udp-port 4789
+vxlan learn-restrict any
+vxlan vlan 100 vni 10100
+vxlan vlan 101 vni 10101
+vxlan vlan 102 vni 10102
+vxlan vrf Lab1 vni 50000
+exit
+
+router bgp 100
+vlan 100
+rd 100:10100
+route-target both 100:10100
+redistribute learned
+exit
+vlan 101
+rd 101:10101
+route-target both 101:10101
+redistribute learned
+exit
+vlan 102
+rd 102:10102
+route-target both 102:10102
+redistribute learned
+exit
+vrf Lab1
+rd 100.0.0.4:1
+route-target export evpn 1:50000
+route-target import evpn 1:50000
+redistribute connected
+exit
+exit
+============================
+LEAF 12
+=============================
+enable
+conf ter 
+hostname LEAF_12
+ip routing
+inter loopback 0
+ip addr 100.0.0.5 255.255.255.255
+exit
+inter loopback 1
+ip addr 100.0.1.5 255.255.255.255
+exit
+inter eth1
+no switchport
+ip addr 200.0.0.18 255.255.255.252
+no shutdown
+exit
+inter eth2
+no switchport
+ip addr 200.0.0.14 255.255.255.252
+no shutdown
+exit
+
+router ospf 10
+router-id 100.0.0.5
+network 100.0.0.5 0.0.0.0 area 0
+network 100.0.1.5 0.0.0.0 area 0
+network 200.0.0.12 0.0.0.3 area 0
+network 200.0.0.16 0.0.0.3 area 0
+exit
+
+router bgp 100
+router-id 100.0.0.5
+distance bgp 20 200 200
+neighbor SPINES peer group
+neighbor SPINES remote-as 100
+neighbor SPINES update-source Loopback0
+neighbor 100.0.0.2 peer group SPINES
+neighbor 100.0.0.3 peer group SPINES
+address-family evpn
+neighbor 100.0.0.2 activate
+neighbor 100.0.0.3 activate
+neighbor SPINES send-community extended
+exit
+
+vrf instance Lab1
+ip routing vrf Lab1
+vlan 200
+name ADMIN
+exit
+vlan 101
+name ACCOUNTING
+exit
+vlan 102
+name TI
+exit
+
+inter vlan 200
+vrf Lab1
+ip address 192.168.200.2/24
+exit
+inter vlan 101
+vrf Lab1
+ip address 192.168.101.2/24
+exit
+inter vlan 102
+vrf Lab1
+ip address 192.168.102.2/24
+exit
+
+int eth3
+switchport mode access
+switchport access vlan 200
+exit
+int eth4
+switchport mode access
+switchport access vlan 101
+exit
+int eth5
+switchport mode access
+switchport access vlan 102
+exit
+
+int vxlan1
+vxlan source-int lo1
+vxlan udp-port 4789
+vxlan learn-restrict any
+vxlan vlan 200 vni 10200
+vxlan vlan 101 vni 10101
+vxlan vlan 102 vni 10102
+vxlan vrf Lab1 vni 50000
+exit
+
+router bgp 100
+vlan 200
+rd 200:10200
+route-target both 200:10200
+redistribute learned
+exit
+vlan 101
+rd 101:10101
+route-target both 101:10101
+redistribute learned
+exit
+vlan 102
+rd 102:10102
+route-target both 102:10102
+redistribute learned
+exit
+vrf Lab1
+rd 100.0.0.5:1
+route-target export evpn 1:50000
+route-target import evpn 1:50000
+redistribute connected
+exit
+exit
+============================
+LEAF 13
+=============================
+enable
+conf ter 
+hostname LEAF_13
+ip routing
+inter loopback 0
+ip addr 100.0.0.11 255.255.255.255
+exit
+inter loopback 1
+ip addr 100.0.1.11 255.255.255.255
+exit
+inter eth1
+no switchport
+ip addr 200.0.1.6 255.255.255.252
+no shutdown
+exit
+
+router ospf 10
+router-id 100.0.0.11
+network 100.0.0.11 0.0.0.0 area 0
+network 100.0.1.11 0.0.0.0 area 0
+network 200.0.1.4 0.0.0.3 area 0
+exit
+
+router bgp 200
+router-id 100.0.0.11
+distance bgp 20 200 200
+neighbor SPINES peer group
+neighbor SPINES remote-as 200
+neighbor SPINES update-source Loopback0
+neighbor 100.0.0.10 peer group SPINES
+address-family evpn
+neighbor 100.0.0.10 activate
+neighbor SPINES send-community extended
+exit
+
+vrf instance Lab1
+ip routing vrf Lab1
+vlan 200
+name ADMIN
+exit
+vlan 100
+name SERVERS
+exit
+vlan 101
+name ACCOUNTING
+exit
+vlan 102
+name TI
+exit
+
+inter vlan 100
+vrf Lab1
+ip address 192.168.100.3/24
+exit
+inter vlan 101
+vrf Lab1
+ip address 192.168.101.3/24
+exit
+inter vlan 102
+vrf Lab1
+ip address 192.168.102.3/24
+exit
+inter vlan 200
+vrf Lab1
+ip address 192.168.200.3/24
+exit
+
+int eth2
+switchport mode access
+switchport access vlan 100
+exit
+int eth3
+switchport mode access
+switchport access vlan 101
+exit
+int eth4
+switchport mode access
+switchport access vlan 102
+exit
+int eth5
+switchport mode access
+switchport access vlan 200
+exit
+
+int vxlan1
+vxlan source-int lo1
+vxlan udp-port 4789
+vxlan learn-restrict any
+vxlan vlan 200 vni 10200
+vxlan vlan 100 vni 10100
+vxlan vlan 101 vni 10101
+vxlan vlan 102 vni 10102
+vxlan vrf Lab1 vni 50000
+exit
+
+router bgp 200
+vlan 200
+rd 200:10200
+route-target both 200:10200
+redistribute learned
+exit
+vlan 100
+rd 100:10100
+route-target both 100:10100
+redistribute learned
+exit
+vlan 101
+rd 101:10101
+route-target both 101:10101
+redistribute learned
+exit
+vlan 102
+rd 102:10102
+route-target both 102:10102
+redistribute learned
+exit
+vrf Lab1
+rd 100.0.0.11:1
+route-target export evpn 1:50000
+route-target import evpn 1:50000
+redistribute connected
+exit
+exit
+============================
+BORDER_LEAF 14
+=============================
+enable
+conf ter 
+hostname BLEAF_14
+ip routing
+inter loopback 0
+ip addr 100.0.0.9 255.255.255.255
+exit
+inter loopback 1
+ip addr 100.0.1.9 255.255.255.255
+exit
+inter eth1
+no switchport
+ip addr 210.0.0.54 255.255.255.252
+no shutdown
+exit
+inter eth2
+no switchport
+ip addr 200.0.1.1 255.255.255.252
+exit
+
+router ospf 10
+router-id 100.0.0.9
+network 100.0.0.9 0.0.0.0 area 0
+network 100.0.1.9 0.0.0.0 area 0
+network 200.0.1.0 0.0.0.3 area 0
+redistribute static
+exit
+
+ip route 0.0.0.0/0 210.0.0.53
+
+router bgp 200
+router-id 100.0.0.9
+distance bgp 20 200 200
+neighbor SPINES peer group
+neighbor SPINES remote-as 200
+neighbor SPINES update-source Loopback0
+neighbor SPINES send-community extended
+neighbor 100.0.0.10 peer group SPINES
+address-family evpn
+neighbor 100.0.0.10 activate
+exit
+
+router bgp 200
+neighbor DCE peer group
+neighbor DCE update-source Loopback0
+neighbor DCE ebgp-multihop 5
+neighbor DCE send-community extended
+neighbor DCE next-hop-unchanged
+neighbor 100.0.0.1 remote-as 100
+neighbor 100.0.0.1 peer group DCE
+address-family evpn
+neighbor 100.0.0.1 activate
+exit
+
+vrf instance Lab1
+ip routing vrf Lab1
+
+int vxlan1
+vxlan source-int lo1
+vxlan udp-port 4789
+vxlan learn-restrict any
+vxlan vrf Lab1 vni 50000
+exit
+
+router bgp 200
+vrf Lab1
+rd 100.0.0.9:1
+route-target export evpn 1:50000
+route-target import evpn 1:50000
+exit
+exit
+
+============================
+ip prefix-list DEFAULT_ONLY seq 10 permit 0.0.0.0/0
+route-map RM-TO-FABRIC permit 10
+match ip address prefix-list DEFAULT_ONLY
+
+neighbor 200.0.1.2 route-map RM-TO-FABRIC out
+
+=============================
+BORDER_LEAF 15
+=============================
+enable
+conf ter 
+hostname BLEAF_15
+ip routing
+inter loopback 0
+ip addr 100.0.0.1 255.255.255.255
+exit
+inter loopback 1
+ip addr 100.0.1.1 255.255.255.255
+exit
+inter eth1
+no switchport
+ip addr 210.0.0.49 255.255.255.252
+no shutdown
+exit
+inter eth2
+no switchport
+ip addr 200.0.0.1 255.255.255.252
+exit
+
+router ospf 10
+router-id 100.0.0.1
+network 100.0.0.1 0.0.0.0 area 0
+network 100.0.1.1 0.0.0.0 area 0
+network 200.0.0.0 0.0.0.3 area 0
+redistribute static
+exit
+
+ip route 0.0.0.0/0 210.0.0.50
+
+router bgp 100
+router-id 100.0.0.1
+distance bgp 20 200 200
+neighbor SPINES peer group
+neighbor SPINES remote-as 100
+neighbor SPINES update-source Loopback0
+neighbor SPINES send-community extended
+neighbor 100.0.0.2 peer group SPINES
+neighbor 100.0.0.3 peer group SPINES
+address-family evpn
+neighbor 100.0.0.2 activate
+neighbor 100.0.0.3 activate
+exit
+
+router bgp 100
+neighbor DCE peer group
+neighbor DCE update-source Loopback0
+neighbor DCE ebgp-multihop 5
+neighbor DCE send-community extended
+neighbor DCE next-hop-unchanged
+neighbor 100.0.0.9 remote-as 200
+neighbor 100.0.0.9 peer group DCE
+address-family evpn
+neighbor 100.0.0.9 activate
+exit
+
+vrf instance Lab1
+ip routing vrf Lab1
+
+int vxlan1
+vxlan source-int lo1
+vxlan udp-port 4789
+vxlan learn-restrict any
+vxlan vrf Lab1 vni 50000
+exit
+
+router bgp 100
+vrf Lab1
+rd 100.0.0.1:1
+route-target export evpn 1:50000
+route-target import evpn 1:50000
+exit
+exit
