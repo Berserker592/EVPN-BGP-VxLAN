@@ -1,5 +1,31 @@
 # EVPN-BGP-VxLAN
+Comparto un nuevo escenario de laboratorio centrado en una arquitectura de centro de datos moderna, que implementa EVPN sobre BGP con VXLAN e interconecta dos centros de datos independientes en una arquitectura spine-leaf mediante interconectividad de capa 3 (L3 DCI).
+
+El objetivo principal era validar la segmentación, la conectividad L3 y la escalabilidad de múltiples centros de datos, manteniendo los dominios de capa 2 confinados a cada centro de datos, evitando la extensión del dominio de difusión y garantizando un diseño más estable y escalable, en consonancia con las mejores prácticas.
+
+
 ## Topologia del Laboratorio
+
+🏗 Tecnologías implementadas
+
+🧵 EVPN sobre BGP (plano de control)
+
+🌐 VXLAN (superposición/plano de datos)
+
+🧱 Arquitectura Spine-Leaf por centro de datos
+
+🔁 OSPFv2 - Infraestructura IP (núcleo/transporte)
+
+🔀 iBGP EVPN intra-centro de datos y eBGP EVPN inter-centro de datos
+
+🧠 VNIs de capa 2 y capa 3
+
+🗂 VRFs para segmentación y aislamiento
+
+🧩 Entorno multi-centro de datos con DCI de capa 3 (sin extensión de capa 2)
+
+🧩 Entorno multi-proveedor (Cisco, Arista)
+
 ![Topología](BGP_EVPN_VxLAN/img_1.png)
 
 ## Tipos de rutas EVPN
